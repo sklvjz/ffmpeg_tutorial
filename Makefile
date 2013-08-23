@@ -7,18 +7,10 @@ FFMPEG_LIBS=    libavdevice                        \
                 libavutil                          \
 
 CFLAGS += -Wall -g
-CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
-LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
+CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS) `sdl-config --cflags --libs`
+LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS) `sdl-config --cflags --libs`
 
-EXAMPLES=       tutorial01                         \
-                api-example                        \
-#                tutorial02                         \
-#                tutorial03                         \
-#                tutorial04                         \
-#                tutorial05                         \
-#                tutorial06                         \
-#                tutorial07                         \
-#                tutorial08                         \
+EXAMPLES=        tutorial02                         \
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
 

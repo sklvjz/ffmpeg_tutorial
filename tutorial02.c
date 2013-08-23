@@ -16,17 +16,37 @@
 // to play the video stream on your screen.
 
 
-#include <avcodec/avcodec.h>
-#include <avformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
 
-#include <SDL.h>
-#include <SDL_thread.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_thread.h>
 
 #ifdef __MINGW32__
 #undef main /* Prevents SDL from overriding main() */
 #endif
 
 #include <stdio.h>
+
+int img_convert(AVPicture *dst, int dst_pix_fmt,
+                                const AVPicture *src, int src_pix_fmt,
+                                int src_width, int src_height)
+{
+        int w;
+        int h;
+        struct SwsContext *pSwsCtx;
+        w = src_width;
+        h = src_height;
+        pSwsCtx = sws_getContext(w, h, src_pix_fmt, 
+                                                             w, h, dst_pix_fmt,
+                                                             SWS_BICUBIC, NULL, NULL, NULL);
+        sws_scale(pSwsCtx, src->data, src->linesize,
+                              0, h, dst->data, dst->linesize);
+     
+        return 0;
+}
+
 
 int main(int argc, char *argv[]) {
   AVFormatContext *pFormatCtx;

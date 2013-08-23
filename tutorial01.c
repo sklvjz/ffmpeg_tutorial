@@ -62,10 +62,6 @@ int img_convert(AVPicture *dst, int dst_pix_fmt,
         sws_scale(pSwsCtx, src->data, src->linesize,
                               0, h, dst->data, dst->linesize);
      
-       
-     //这里释放掉pSwsCtx的内存
-
-     
         return 0;
 }
 
@@ -80,6 +76,7 @@ int main(int argc, char *argv[]) {
   int             frameFinished;
   int             numBytes;
   uint8_t         *buffer;
+    char codec_info[1024];
   
   if(argc < 2) {
     printf("Please provide a movie file\n");
@@ -121,6 +118,7 @@ int main(int argc, char *argv[]) {
   // Open codec
   if(avcodec_open(pCodecCtx, pCodec)<0)
     return -1; // Could not open codec
+
   
   // Allocate video frame
   pFrame=avcodec_alloc_frame();
@@ -133,6 +131,9 @@ int main(int argc, char *argv[]) {
   // Determine required buffer size and allocate buffer
   numBytes=avpicture_get_size(PIX_FMT_RGB24, pCodecCtx->width,
 			      pCodecCtx->height);
+
+  printf("PIX_FMT_RGB24:%d, pCodecCtx->width :%d,pCodecCtx->height:%d\n",PIX_FMT_RGB24, pCodecCtx->width,pCodecCtx->height);
+  printf("numBytes:%d\n",numBytes);
   buffer=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
   
   // Assign appropriate parts of buffer to image planes in pFrameRGB
