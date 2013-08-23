@@ -153,30 +153,9 @@ int main(int argc, char *argv[]) {
       // Did we get a video frame?
       if(frameFinished) {
 	// Convert the image from its native format to RGB
-#if 1
 	img_convert((AVPicture *)pFrameRGB, PIX_FMT_RGB24, 
                     (AVPicture*)pFrame, pCodecCtx->pix_fmt, pCodecCtx->width, 
                     pCodecCtx->height);
-#else
-      struct SwsContext *img_convert_ctx;
-
-      if (img_convert_ctx == NULL)
-      {
-          img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
-                                           pCodecCtx->pix_fmt,
-                                           pCodecCtx->width, pCodecCtx->height,
-                                           PIX_FMT_YUV420P,
-                                           SWS_BICUBIC, NULL, NULL, NULL);
-          if (img_convert_ctx == NULL)
-          {
-              fprintf(stderr, "Cannot initialize the conversion context/n");
-              exit(1);
-          }
-      }
-
-      sws_scale(img_convert_ctx, pFrame->data, pFrame->linesize,
-                     0, pCodecCtx->height, pFrameRGB->data, pFrameRGB->linesize);
-#endif
 
 	
 	// Save the frame to disk
