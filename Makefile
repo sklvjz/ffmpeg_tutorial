@@ -10,7 +10,7 @@ CFLAGS += -Wall -g
 CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS) `sdl-config --cflags --libs`
 LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS) `sdl-config --cflags --libs`
 
-EXAMPLES=        tutorial02                         \
+EXAMPLES=        tutorial03                         \
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
 
