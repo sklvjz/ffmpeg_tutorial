@@ -94,11 +94,7 @@ int main(int argc, char *argv[]) {
   pFrame=avcodec_alloc_frame();
 
   // Make a screen to put our video
-#ifndef __DARWIN__
-        screen = SDL_SetVideoMode(pCodecCtx->width, pCodecCtx->height, 0, 0);
-#else
-        screen = SDL_SetVideoMode(pCodecCtx->width, pCodecCtx->height, 24, 0);
-#endif
+  screen = SDL_SetVideoMode(pCodecCtx->width, pCodecCtx->height, 0, 0);
   if(!screen) {
     fprintf(stderr, "SDL: could not set video mode - exiting\n");
     exit(1);
