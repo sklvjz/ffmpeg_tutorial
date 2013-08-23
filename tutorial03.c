@@ -121,38 +121,44 @@ int audio_decode_frame(AVCodecContext *aCodecCtx, uint8_t *audio_buf, int buf_si
 
   int len1, data_size;
 
-  for(;;) {
-    while(audio_pkt_size > 0) {
-      data_size = buf_size;
-      len1 = avcodec_decode_audio2(aCodecCtx, (int16_t *)audio_buf, &data_size, 
-				  audio_pkt_data, audio_pkt_size);
-      if(len1 < 0) {
-	/* if error, skip frame */
-	audio_pkt_size = 0;
-	break;
-      }
-      audio_pkt_data += len1;
-      audio_pkt_size -= len1;
-      if(data_size <= 0) {
-	/* No data yet, get more frames */
-	continue;
-      }
-      /* We have data, return it and come back for more later */
-      return data_size;
-    }
-    if(pkt.data)
-      av_free_packet(&pkt);
+    for(;;) 
+    {
+        while(audio_pkt_size > 0) 
+        {
+            data_size = buf_size;
+            len1 = avcodec_decode_audio2(aCodecCtx, (int16_t *)audio_buf, &data_size, 
+                                         audio_pkt_data, audio_pkt_size);
+            if(len1 < 0)
+            {
+                /* if error, skip frame */
+                audio_pkt_size = 0;
+                break;
+            }
+            audio_pkt_data += len1;
+            audio_pkt_size -= len1;
+            if(data_size <= 0) 
+            {
+                /* No data yet, get more frames */
+                continue;
+            }
+            /* We have data, return it and come back for more later */
+            return data_size;
+        }
+        if(pkt.data)
+        av_free_packet(&pkt);
 
-    if(quit) {
-      return -1;
-    }
+        if(quit)
+        {
+            return -1;
+        }
 
-    if(packet_queue_get(&audioq, &pkt, 1) < 0) {
-      return -1;
+        if(packet_queue_get(&audioq, &pkt, 1) < 0) 
+        {
+            return -1;
+        }
+        audio_pkt_data = pkt.data;
+        audio_pkt_size = pkt.size;
     }
-    audio_pkt_data = pkt.data;
-    audio_pkt_size = pkt.size;
-  }
 }
 
 void audio_callback(void *userdata, Uint8 *stream, int len) {
@@ -164,27 +170,32 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
   static unsigned int audio_buf_size = 0;
   static unsigned int audio_buf_index = 0;
 
-  while(len > 0) {
-    if(audio_buf_index >= audio_buf_size) {
-      /* We have already sent all our data; get more */
-      audio_size = audio_decode_frame(aCodecCtx, audio_buf, sizeof(audio_buf));
-      if(audio_size < 0) {
-	/* If error, output silence */
-	audio_buf_size = 1024; // arbitrary?
-	memset(audio_buf, 0, audio_buf_size);
-      } else {
-	audio_buf_size = audio_size;
-      }
-      audio_buf_index = 0;
+    while(len > 0) 
+    {
+        if(audio_buf_index >= audio_buf_size) 
+        {
+            /* We have already sent all our data; get more */
+            audio_size = audio_decode_frame(aCodecCtx, audio_buf, sizeof(audio_buf));
+            if(audio_size < 0) 
+            {
+                /* If error, output silence */
+                audio_buf_size = 1024; // arbitrary?
+                memset(audio_buf, 0, audio_buf_size);
+            } 
+            else 
+            {
+                audio_buf_size = audio_size;
+            }
+            audio_buf_index = 0;
+        }
+        len1 = audio_buf_size - audio_buf_index;
+        if(len1 > len)
+            len1 = len;
+        memcpy(stream, (uint8_t *)audio_buf + audio_buf_index, len1);
+        len -= len1;
+        stream += len1;
+        audio_buf_index += len1;
     }
-    len1 = audio_buf_size - audio_buf_index;
-    if(len1 > len)
-      len1 = len;
-    memcpy(stream, (uint8_t *)audio_buf + audio_buf_index, len1);
-    len -= len1;
-    stream += len1;
-    audio_buf_index += len1;
-  }
 }
 
 int img_convert(AVPicture *dst, int dst_pix_fmt,
@@ -308,11 +319,7 @@ int main(int argc, char *argv[]) {
 
   // Make a screen to put our video
 
-#ifndef __DARWIN__
-        screen = SDL_SetVideoMode(pCodecCtx->width, pCodecCtx->height, 0, 0);
-#else
-        screen = SDL_SetVideoMode(pCodecCtx->width, pCodecCtx->height, 24, 0);
-#endif
+  screen = SDL_SetVideoMode(pCodecCtx->width, pCodecCtx->height, 0, 0);
   if(!screen) {
     fprintf(stderr, "SDL: could not set video mode - exiting\n");
     exit(1);
