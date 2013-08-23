@@ -11,6 +11,7 @@ CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
 LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
 
 EXAMPLES=       tutorial01                         \
+                api-example                        \
 #                tutorial02                         \
 #                tutorial03                         \
 #                tutorial04                         \
