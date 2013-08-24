@@ -261,81 +261,95 @@ static void schedule_refresh(VideoState *is, int delay)
     SDL_AddTimer(delay, sdl_refresh_timer_cb, is);
 }
 
-void video_display(VideoState *is) {
+void video_display(VideoState *is) 
+{
+    SDL_Rect rect;
+    VideoPicture *vp;
+    AVPicture pict;
+    float aspect_ratio;
+    int w, h, x, y;
+    int i;
 
-  SDL_Rect rect;
-  VideoPicture *vp;
-  AVPicture pict;
-  float aspect_ratio;
-  int w, h, x, y;
-  int i;
+    vp = &is->pictq[is->pictq_rindex];
+    if(vp->bmp)
+    {
+        if(is->video_st->codec->sample_aspect_ratio.num == 0) 
+        {
+            aspect_ratio = 0;
+        } 
+        else
+        {
+            aspect_ratio = av_q2d(is->video_st->codec->sample_aspect_ratio) *
+            is->video_st->codec->width / is->video_st->codec->height;
+        }
+        if(aspect_ratio <= 0.0) 
+        {
+            aspect_ratio = (float)is->video_st->codec->width /
+            (float)is->video_st->codec->height;
+        }
+        h = screen->h;
+        w = ((int)rint(h * aspect_ratio)) & -3;
+        if(w > screen->w)
+        {
+            w = screen->w;
+            h = ((int)rint(w / aspect_ratio)) & -3;
+        }
+        x = (screen->w - w) / 2;
+        y = (screen->h - h) / 2;
 
-  vp = &is->pictq[is->pictq_rindex];
-  if(vp->bmp) {
-    if(is->video_st->codec->sample_aspect_ratio.num == 0) {
-      aspect_ratio = 0;
-    } else {
-      aspect_ratio = av_q2d(is->video_st->codec->sample_aspect_ratio) *
-	is->video_st->codec->width / is->video_st->codec->height;
+        rect.x = x;
+        rect.y = y;
+        rect.w = w;
+        rect.h = h;
+        SDL_DisplayYUVOverlay(vp->bmp, &rect);
     }
-    if(aspect_ratio <= 0.0) {
-      aspect_ratio = (float)is->video_st->codec->width /
-	(float)is->video_st->codec->height;
-    }
-    h = screen->h;
-    w = ((int)rint(h * aspect_ratio)) & -3;
-    if(w > screen->w) {
-      w = screen->w;
-      h = ((int)rint(w / aspect_ratio)) & -3;
-    }
-    x = (screen->w - w) / 2;
-    y = (screen->h - h) / 2;
-    
-    rect.x = x;
-    rect.y = y;
-    rect.w = w;
-    rect.h = h;
-    SDL_DisplayYUVOverlay(vp->bmp, &rect);
-  }
 }
 
-void video_refresh_timer(void *userdata) {
+void video_refresh_timer(void *userdata) 
+{
+    VideoState *is = (VideoState *)userdata;
+    VideoPicture *vp;
 
-  VideoState *is = (VideoState *)userdata;
-  VideoPicture *vp;
-  
-  if(is->video_st) {
-    if(is->pictq_size == 0) {
-      schedule_refresh(is, 1);
-    } else {
-      vp = &is->pictq[is->pictq_rindex];
-      /* Now, normally here goes a ton of code
-	 about timing, etc. we're just going to
-	 guess at a delay for now. You can
-	 increase and decrease this value and hard code
-	 the timing - but I don't suggest that ;)
-	 We'll learn how to do it for real later.
-      */
-      schedule_refresh(is, 80);
-      
-      /* show the picture! */
-      video_display(is);
-      
-      /* update queue for next picture! */
-      if(++is->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE) {
-	is->pictq_rindex = 0;
-      }
-      SDL_LockMutex(is->pictq_mutex);
-      is->pictq_size--;
-      SDL_CondSignal(is->pictq_cond);
-      SDL_UnlockMutex(is->pictq_mutex);
+    if(is->video_st)
+    {
+        if(is->pictq_size == 0)
+        {
+            schedule_refresh(is, 1);
+        } 
+        else
+        {
+            vp = &is->pictq[is->pictq_rindex];
+            /* Now, normally here goes a ton of code
+            about timing, etc. we're just going to
+            guess at a delay for now. You can
+            increase and decrease this value and hard code
+            the timing - but I don't suggest that ;)
+            We'll learn how to do it for real later.
+            */
+            schedule_refresh(is, 80);
+
+            /* show the picture! */
+            video_display(is);
+
+            /* update queue for next picture! */
+            if(++is->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE) 
+            {
+                is->pictq_rindex = 0;
+            }
+            SDL_LockMutex(is->pictq_mutex);
+            is->pictq_size--;
+            SDL_CondSignal(is->pictq_cond);
+            SDL_UnlockMutex(is->pictq_mutex);
+        }
+    } 
+    else
+    {
+        schedule_refresh(is, 100);
     }
-  } else {
-    schedule_refresh(is, 100);
-  }
 }
       
-void alloc_picture(void *userdata) {
+void alloc_picture(void *userdata) 
+{
 
   VideoState *is = (VideoState *)userdata;
   VideoPicture *vp;
@@ -745,7 +759,6 @@ int main(int argc, char *argv[])
 
     for(;;) 
     {
-
         SDL_WaitEvent(&event);
         switch(event.type) 
         {
